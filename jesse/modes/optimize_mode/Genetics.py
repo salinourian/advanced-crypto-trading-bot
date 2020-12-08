@@ -92,7 +92,13 @@ class Genetics(ABC):
 
                     try:
                         for _ in range(self.cpu_cores):
-                            dna = ''.join(choices(self.charset, k=self.solution_len))
+
+                            while True:
+                                dna = ''.join(choices(self.charset, k=self.solution_len))
+                                hp = jh.dna_to_hp(self.options['strategy_hp'], dna)
+                                if jh.hp_rules_valid(hp, self.options['hyperparamter_rules']):
+                                    break
+
                             w = Process(target=get_fitness, args=(dna, dna_bucket))
                             w.start()
                             workers.append(w)
@@ -165,9 +171,15 @@ class Genetics(ABC):
         self.population = list(sorted(self.population, key=lambda x: x['fitness'], reverse=True))
 
     def mutate(self, baby):
-        replace_at = randint(0, self.solution_len - 1)
-        replace_with = choice(self.charset)
-        dna = '{}{}{}'.format(baby['dna'][:replace_at], replace_with, baby['dna'][replace_at + 1:])
+
+        while True:
+            replace_at = randint(0, self.solution_len - 1)
+            replace_with = choice(self.charset)
+            dna = '{}{}{}'.format(baby['dna'][:replace_at], replace_with, baby['dna'][replace_at + 1:])
+            hp = jh.dna_to_hp(self.options['strategy_hp'], dna)
+            if jh.hp_rules_valid(hp, self.options['hyperparamter_rules']):
+                break
+
         fitness_score, fitness_log = self.fitness(dna)
 
         return {
@@ -182,11 +194,15 @@ class Genetics(ABC):
 
         dna = ''
 
-        for i in range(self.solution_len):
-            if i % 2 == 0:
-                dna += daddy['dna'][i]
-            else:
-                dna += mommy['dna'][i]
+        while True:
+            for i in range(self.solution_len):
+                if i % 2 == 0:
+                    dna += daddy['dna'][i]
+                else:
+                    dna += mommy['dna'][i]
+            hp = jh.dna_to_hp(self.options['strategy_hp'], dna)
+            if jh.hp_rules_valid(hp, self.options['hyperparamter_rules']):
+                break
 
         fitness_score, fitness_log = self.fitness(dna)
 

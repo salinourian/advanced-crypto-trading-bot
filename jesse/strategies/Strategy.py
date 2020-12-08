@@ -152,6 +152,9 @@ class Strategy(ABC):
     def hyperparameters(self):
         return []
 
+    def hyperparameter_rules(self):
+        return []
+
     def _execute_long(self):
         self.go_long()
 

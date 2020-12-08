@@ -28,6 +28,7 @@ class Optimizer(Genetics):
         self.timeframe = router.routes[0].timeframe
         StrategyClass = jh.get_strategy_class(self.strategy_name)
         self.strategy_hp = StrategyClass.hyperparameters(None)
+        self.hyperparamter_rules = StrategyClass.hyperparamter_rules(None)
         solution_len = len(self.strategy_hp)
 
         if solution_len == 0:
@@ -41,7 +42,9 @@ class Optimizer(Genetics):
                 'strategy_name': self.strategy_name,
                 'exchange': self.exchange,
                 'symbol': self.symbol,
-                'timeframe': self.timeframe
+                'timeframe': self.timeframe,
+                'strategy_hp': self.strategy_hp,
+                'hyperparamter_rules': self.hyperparamter_rules
             }
         )
 

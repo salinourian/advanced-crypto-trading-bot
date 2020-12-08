@@ -272,6 +272,29 @@ def get_strategy_class(strategy_name):
         return locate('strategies.{}.{}'.format(strategy_name, strategy_name))
 
 
+def hp_rules_valid(hp, rules):
+    check = np.full((len(rules)), False, dtype=bool)
+
+    for i, rule in enumerate(rules):
+        if rule['operator'] not in ["<", ">", "<=", ">="]:
+            raise ValueError("{} is not a supported operator. Choose from < > <= >=".format(rule['operator']))
+        if rule['hp_name1'] not in hp:
+            raise ValueError("The hp name {} doesn't exist.".format(rule['hp_name1']))
+        if rule['hp_name2'] not in hp:
+            raise ValueError("The hp name {} doesn't exist.".format(rule['hp_name2']))
+
+        if rule['operator'] == ">":
+            check[i] = hp[rule['hp_name1']] > hp[rule['hp_name2']]
+        elif rule['operator'] == "<":
+            check[i] = hp[rule['hp_name1']] < hp[rule['hp_name2']]
+        elif rule['operator'] == ">=":
+            check[i] = hp[rule['hp_name1']] >= hp[rule['hp_name2']]
+        elif rule['operator'] == "<=":
+            check[i] = hp[rule['hp_name1']] <= hp[rule['hp_name2']]
+
+    return np.all(check == True)
+
+
 def insecure_hash(msg: str) -> str:
     return hashlib.md5(msg.encode()).hexdigest()
 

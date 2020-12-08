@@ -222,6 +222,17 @@ def test_get_strategy_class():
     assert issubclass(jh.get_strategy_class("Test01"), Strategy)
 
 
+def test_hp_rules_valid():
+    hp = {'hp1': 0.08518987341772151, 'hp2': 3, 'hp3': 16, 'hp4': 10}
+
+    rules = [
+        {'hp_name1': 'hp1', 'operator': "<", 'hp_name2': 'hp2'},
+        {'hp_name1': 'hp3', 'operator': ">=", 'hp_name2': 'hp4'},
+    ]
+
+    assert jh.hp_rules_valid(hp, rules) == True
+
+
 def test_insecure_hash():
     assert jh.insecure_hash("test") == "098f6bcd4621d373cade4e832627b4f6"
 
