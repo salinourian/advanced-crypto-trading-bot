@@ -96,7 +96,8 @@ class Genetics(ABC):
                             while True:
                                 dna = ''.join(choices(self.charset, k=self.solution_len))
                                 hp = jh.dna_to_hp(self.options['strategy_hp'], dna)
-                                if jh.hp_rules_valid(hp, self.options['hyperparamter_rules']):
+                                if jh.hp_rules_valid(hp, self.options['hyperparameters_rules']) or len(
+                                        self.options['hyperparameters_rules']) == 0:
                                     break
 
                             w = Process(target=get_fitness, args=(dna, dna_bucket))
@@ -177,7 +178,8 @@ class Genetics(ABC):
             replace_with = choice(self.charset)
             dna = '{}{}{}'.format(baby['dna'][:replace_at], replace_with, baby['dna'][replace_at + 1:])
             hp = jh.dna_to_hp(self.options['strategy_hp'], dna)
-            if jh.hp_rules_valid(hp, self.options['hyperparamter_rules']):
+            if jh.hp_rules_valid(hp, self.options['hyperparameters_rules']) or len(
+                    self.options['hyperparameters_rules']) == 0:
                 break
 
         fitness_score, fitness_log = self.fitness(dna)
@@ -201,7 +203,8 @@ class Genetics(ABC):
                 else:
                     dna += mommy['dna'][i]
             hp = jh.dna_to_hp(self.options['strategy_hp'], dna)
-            if jh.hp_rules_valid(hp, self.options['hyperparamter_rules']):
+            if jh.hp_rules_valid(hp, self.options['hyperparameters_rules']) or len(
+                    self.options['hyperparameters_rules']) == 0:
                 break
 
         fitness_score, fitness_log = self.fitness(dna)
