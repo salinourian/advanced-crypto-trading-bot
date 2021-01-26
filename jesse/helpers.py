@@ -9,6 +9,7 @@ import uuid
 import arrow
 import click
 import numpy as np
+from scipy.stats import norm
 
 CACHED_CONFIG = dict()
 
@@ -695,3 +696,18 @@ def unique_list(arr) -> list:
     seen = set()
     seen_add = seen.add
     return [x for x in arr if not (x in seen or seen_add(x))]
+
+
+def monte_carlo_candles(candles: np.array) -> np.array:
+    log_returns = np.log(1 + (np.diff(candles) / candles[:-1] * 100))
+    u = np.mean(log_returns)
+    var = np.var(log_returns)
+    drift = u - (0.5 * var)
+    stdev = np.std(log_returns)
+    rando = np.random.rand(len(candles))
+    daily_returns = np.exp(np.nan_to_num(drift) + np.nan_to_num(stdev) * norm.ppf(rando))
+    price_list = np.zeros_like(daily_returns)
+    price_list[0] = candles[0]
+    for d in range(1, len(candles)):
+        price_list[d] = price_list[d - 1] * daily_returns[d]
+    return price_list

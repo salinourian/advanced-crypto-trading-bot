@@ -24,7 +24,7 @@ from jesse.services.validators import validate_routes
 from jesse.store import store
 
 
-def run(start_date: str, finish_date: str, candles=None, chart=False, tradingview=False, csv=False, json=False):
+def run(start_date: str, finish_date: str, candles=None, chart=False, tradingview=False, csv=False, json=False, montecarlo=False):
     # clear the screen
     if not jh.should_execute_silently():
         click.clear()
@@ -56,7 +56,7 @@ def run(start_date: str, finish_date: str, candles=None, chart=False, tradingvie
             print('     Symbol  |     timestamp    | open | close | high | low | volume')
 
     # run backtest simulation
-    simulator(candles)
+    simulator(candles, montecarlo=montecarlo)
 
     if not jh.should_execute_silently():
         # print trades statistics
@@ -167,7 +167,7 @@ def load_candles(start_date_str: str, finish_date_str: str):
     return candles
 
 
-def simulator(candles, hyperparameters=None):
+def simulator(candles, hyperparameters=None, montecarlo=False):
     begin_time_track = time.time()
     key = '{}-{}'.format(config['app']['considering_candles'][0][0], config['app']['considering_candles'][0][1])
     first_candles_set = candles[key]['candles']
@@ -175,6 +175,14 @@ def simulator(candles, hyperparameters=None):
     # to preset the array size for performance
     store.app.starting_time = first_candles_set[0][0]
     store.app.time = first_candles_set[0][0]
+
+    if montecarlo:
+        for j in candles:
+            candles[j]['candles'][:, 1] = jh.monte_carlo_candles(candles[j]['candles'][:, 1])
+            candles[j]['candles'][:, 2] = jh.monte_carlo_candles(candles[j]['candles'][:, 2])
+            candles[j]['candles'][:, 3] = jh.monte_carlo_candles(candles[j]['candles'][:, 3])
+            candles[j]['candles'][:, 4] = jh.monte_carlo_candles(candles[j]['candles'][:, 4])
+            # candles[j]['candles'][:, 5] = jh.monte_carlo_candles(candles[j]['candles'][:, 5])
 
     # initiate strategies
     for r in router.routes:
