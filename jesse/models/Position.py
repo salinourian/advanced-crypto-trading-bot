@@ -39,6 +39,11 @@ class Position:
     #     # TODO: make sure that it is available only for live trading in futures markets
     #     return self._mark_price
 
+    # TODO: more properties to add:
+    # - Margin Ratio
+    # * Liquidation price
+    # * mark price?!
+
     @property
     def value(self) -> float:
         """
@@ -134,17 +139,6 @@ class Position:
             return 'spot'
         else:
             return self.exchange.futures_leverage_mode
-
-    # - Margin Ratio
-    # * Liquidation price
-    # * mark price?!
-    # * ROE(PNL?)
-    # * Maintenance futures
-    # * futures balance
-
-    # @property
-    # def futures_ratio(self):
-    #     return 0
 
     def _close(self, close_price: float) -> None:
         if self.is_open is False:
