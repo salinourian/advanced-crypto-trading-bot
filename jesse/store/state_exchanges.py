@@ -1,7 +1,7 @@
 from typing import Union, ValuesView
 
 from jesse.config import config
-from jesse.models import SpotExchange, FuturesExchange
+from jesse.models import SpotExchange, FuturesExchange, InverseFuturesExchange
 from jesse.exceptions import InvalidConfig
 import jesse.helpers as jh
 
@@ -21,6 +21,12 @@ class ExchangesState:
                 self.storage[name] = FuturesExchange(
                     name, starting_assets, fee,
                     settlement_currency=jh.get_config('env.exchanges.{}.settlement_currency'.format(name)),
+                    futures_leverage_mode=jh.get_config('env.exchanges.{}.futures_leverage_mode'.format(name)),
+                    futures_leverage=jh.get_config('env.exchanges.{}.futures_leverage'.format(name)),
+                )
+            elif exchange_type == 'inverse futures':
+                self.storage[name] = InverseFuturesExchange(
+                    name, starting_assets, fee,
                     futures_leverage_mode=jh.get_config('env.exchanges.{}.futures_leverage_mode'.format(name)),
                     futures_leverage=jh.get_config('env.exchanges.{}.futures_leverage'.format(name)),
                 )

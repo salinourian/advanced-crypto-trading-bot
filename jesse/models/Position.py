@@ -134,8 +134,8 @@ class Position:
         return self.qty == 0
 
     @property
-    def mode(self) -> str:
-        if self.exchange.spot == 'spot':
+    def margin_mode(self) -> str:
+        if self.exchange.type == 'spot':
             return 'spot'
         else:
             return self.exchange.futures_leverage_mode
@@ -156,7 +156,7 @@ class Position:
         self.exit_price = close_price
 
         if self.exchange:
-            self.exchange.add_realized_pnl(estimated_profit)
+            self.exchange.add_realized_pnl(self.symbol, estimated_profit)
             self.exchange.temp_reduced_amount[jh.base_asset(self.symbol)] += abs(close_qty * close_price)
         self.qty = 0
         self.entry_price = None
@@ -186,7 +186,7 @@ class Position:
 
         if self.exchange:
             # self.exchange.increase_futures_balance(qty * self.entry_price + estimated_profit)
-            self.exchange.add_realized_pnl(estimated_profit)
+            self.exchange.add_realized_pnl(self.symbol, estimated_profit)
             self.exchange.temp_reduced_amount[jh.base_asset(self.symbol)] += abs(qty * price)
 
         if self.type == trade_types.LONG:
@@ -257,7 +257,7 @@ class Position:
 
         # TODO: detect reduce_only order, and if so, see if you need to adjust qty and price (above variables)
 
-        self.exchange.charge_fee(qty * price)
+        self.exchange.charge_fee(self.symbol, qty * price)
 
         # order opens position
         if self.qty == 0:

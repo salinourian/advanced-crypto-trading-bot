@@ -3,6 +3,7 @@ from .CompletedTrade import CompletedTrade
 from .Exchange import Exchange
 from .SpotExchange import SpotExchange
 from .FuturesExchange import FuturesExchange
+from .InverseFuturesExchange import InverseFuturesExchange
 from .Order import Order
 from .Position import Position
 from .Route import Route

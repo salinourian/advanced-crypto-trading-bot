@@ -48,9 +48,9 @@ class Exchange(ABC):
         pass
 
     @abstractmethod
-    def add_realized_pnl(self, realized_pnl: float):
+    def add_realized_pnl(self, symbol: str, realized_pnl: float):
         pass
 
     @abstractmethod
-    def charge_fee(self, amount):
+    def charge_fee(self, symbol: str, amount):
         pass

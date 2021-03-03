@@ -7,10 +7,10 @@ from .Exchange import Exchange
 
 
 class SpotExchange(Exchange):
-    def add_realized_pnl(self, realized_pnl: float):
+    def add_realized_pnl(self, symbol: str, realized_pnl: float):
         pass
 
-    def charge_fee(self, amount):
+    def charge_fee(self, symbol: str, amount):
         pass
 
     # current holding assets

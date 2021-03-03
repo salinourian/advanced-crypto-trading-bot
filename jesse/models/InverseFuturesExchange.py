@@ -1,6 +1,6 @@
 import jesse.helpers as jh
 import jesse.services.logger as logger
-from jesse.exceptions import NegativeBalance, InsufficientMargin
+from jesse.exceptions import InsufficientMargin
 from jesse.models import Order
 from jesse.enums import sides, order_types
 from jesse.libs import DynamicNumpyArray
@@ -9,7 +9,11 @@ from jesse.services import selectors
 from .Exchange import Exchange
 
 
-class FuturesExchange(Exchange):
+class InverseFuturesExchange(Exchange):
+    """
+    In inverse future contracts, the settlement_currency is the base asset itself.
+    """
+
     # current holding assets
     assets = {}
     # current available assets (dynamically changes based on active orders)
@@ -23,11 +27,10 @@ class FuturesExchange(Exchange):
             name: str,
             starting_assets: list,
             fee_rate: float,
-            settlement_currency: str,
             futures_leverage_mode: str,
             futures_leverage: int
     ):
-        super().__init__(name, starting_assets, fee_rate, 'futures')
+        super().__init__(name, starting_assets, fee_rate, 'inverse futures')
 
         self.futures_leverage_mode = futures_leverage_mode
         self.futures_leverage = futures_leverage
@@ -54,20 +57,25 @@ class FuturesExchange(Exchange):
         for k in self.available_assets:
             self.available_assets[k] = 0
 
-        self.settlement_currency = settlement_currency.upper()
-
     def wallet_balance(self, symbol=''):
-        return self.assets[self.settlement_currency]
+        if symbol == '':
+            raise ValueError
+        settlement_currency = jh.base_asset(symbol)
+        return self.assets[settlement_currency]
 
+    # TODO
     def available_margin(self, symbol=''):
-        temp_credit = self.assets[self.settlement_currency] * self.futures_leverage
+        if symbol == '':
+            raise ValueError
+        settlement_currency = jh.base_asset(symbol)
+        temp_credit = self.assets[settlement_currency] * self.futures_leverage
         # we need to consider buy and sell orders of ALL pairs
         # also, consider the value of all open positions
         for asset in self.assets:
-            if asset == self.settlement_currency:
+            if asset == settlement_currency:
                 continue
 
-            position = selectors.get_position(self.name, asset + "-" + self.settlement_currency)
+            position = selectors.get_position(self.name, asset + "-" + settlement_currency)
             if position is None:
                 continue
 
@@ -87,27 +95,29 @@ class FuturesExchange(Exchange):
 
         return temp_credit
 
-    def charge_fee(self, symbol: str, amount):
+    def charge_fee(self, symbol, amount):
+        settlement_currency = jh.base_asset(symbol)
         fee_amount = abs(amount) * self.fee_rate
-        new_balance = self.assets[self.settlement_currency] - fee_amount
+        new_balance = self.assets[settlement_currency] - fee_amount
         logger.info(
             'Charged {} as fee. Balance for {} on {} changed from {} to {}'.format(
-                round(fee_amount, 2), self.settlement_currency, self.name,
-                round(self.assets[self.settlement_currency], 2),
+                round(fee_amount, 2), settlement_currency, self.name,
+                round(self.assets[settlement_currency], 2),
                 round(new_balance, 2),
             )
         )
-        self.assets[self.settlement_currency] = new_balance
+        self.assets[settlement_currency] = new_balance
 
     def add_realized_pnl(self, symbol: str, realized_pnl: float):
-        new_balance = self.assets[self.settlement_currency] + realized_pnl
+        settlement_currency = jh.base_asset(symbol)
+        new_balance = self.assets[settlement_currency] + realized_pnl
         logger.info('Added realized PNL of {}. Balance for {} on {} changed from {} to {}'.format(
             round(realized_pnl, 2),
-            self.settlement_currency, self.name,
-            round(self.assets[self.settlement_currency], 2),
+            settlement_currency, self.name,
+            round(self.assets[settlement_currency], 2),
             round(new_balance, 2),
         ))
-        self.assets[self.settlement_currency] = new_balance
+        self.assets[settlement_currency] = new_balance
 
     def on_order_submission(self, order: Order, skip_market_order=True):
         base_asset = jh.base_asset(order.symbol)
@@ -118,9 +128,10 @@ class FuturesExchange(Exchange):
                 order_size = abs(order.qty * order.price)
                 remaining_margin = self.available_margin()
                 if order_size > remaining_margin:
-                    raise InsufficientMargin('You cannot submit an order for ${} when your margin balance is ${}'.format(
-                        round(order_size), round(remaining_margin)
-                    ))
+                    raise InsufficientMargin(
+                        'You cannot submit an order for ${} when your margin balance is ${}'.format(
+                            round(order_size), round(remaining_margin)
+                        ))
 
         # skip market order at the time of submission because we don't have
         # the exact order.price. Instead, we call on_order_submission() one

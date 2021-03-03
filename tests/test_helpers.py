@@ -29,6 +29,8 @@ def test_base_asset():
     assert jh.base_asset('DEFI-USDT') == 'DEFI'
     assert jh.base_asset('DEFI-USD') == 'DEFI'
 
+    assert jh.base_asset('BTC-PERP') == 'BTC'
+
 
 def test_binary_search():
     arr = [0, 11, 22, 33, 44, 54, 55]
