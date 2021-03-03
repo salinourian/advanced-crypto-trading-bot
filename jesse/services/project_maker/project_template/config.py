@@ -75,7 +75,7 @@ config = {
             ],
         },
 
-        # https://www.binance.com
+        # https://www.binance.com/en/futures/BTC_USDT
         'Binance Futures': {
             'fee': 0.0004,
 
@@ -92,6 +92,24 @@ config = {
             # used for spot exchange only
             'assets': [
                 {'asset': 'USDT', 'balance': 10_000},
+            ],
+        },
+
+        # https://www.binance.com/en/delivery/btcusd_perpetual
+        'Binance Inverse Futures': {
+            'fee': 0.0004,
+
+            # backtest mode only: accepted are 'spot' and 'futures'
+            'type': 'inverse futures',
+
+            # accepted values are: 'cross' and 'isolated'
+            'futures_leverage_mode': 'cross',
+            # 1x, 2x, 10x, 50x, etc. Enter as integers
+            'futures_leverage': 1,
+
+            'assets': [
+                {'asset': 'BTC', 'balance': 1},
+                {'asset': 'ETH', 'balance': 10},
             ],
         },
 
