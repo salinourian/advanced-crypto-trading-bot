@@ -33,13 +33,20 @@ def get_btc_candles():
     return candles
 
 
-def set_up(routes=None, is_futures_trading=True, leverage=1, leverage_mode='cross', zero_fee=False):
+def set_up(routes=None, is_futures_trading=True, leverage=1, leverage_mode='cross', zero_fee=False, is_inverse_futures=False):
     reset_config()
-    config['env']['exchanges'][exchanges.SANDBOX]['assets'] = [
-        {'asset': 'USDT', 'balance': 10_000},
-        {'asset': 'BTC', 'balance': 0},
-        {'asset': 'ETH', 'balance': 0},
-    ]
+
+    if is_inverse_futures:
+        config['env']['exchanges'][exchanges.SANDBOX]['assets'] = [
+            {'asset': 'USDT', 'balance': 0},
+            {'asset': 'BTC', 'balance': 1},
+        ]
+    else:
+        config['env']['exchanges'][exchanges.SANDBOX]['assets'] = [
+            {'asset': 'USDT', 'balance': 10_000},
+            {'asset': 'BTC', 'balance': 0},
+            {'asset': 'ETH', 'balance': 0},
+        ]
 
     if zero_fee:
         config['env']['exchanges']['Sandbox']['fee'] = 0
@@ -47,6 +54,11 @@ def set_up(routes=None, is_futures_trading=True, leverage=1, leverage_mode='cros
     if is_futures_trading:
         # used only in futures trading
         config['env']['exchanges'][exchanges.SANDBOX]['type'] = 'futures'
+        config['env']['exchanges'][exchanges.SANDBOX]['futures_leverage_mode'] = leverage_mode
+        config['env']['exchanges'][exchanges.SANDBOX]['futures_leverage'] = leverage
+    elif is_inverse_futures:
+        # used only in futures trading
+        config['env']['exchanges'][exchanges.SANDBOX]['type'] = 'inverse futures'
         config['env']['exchanges'][exchanges.SANDBOX]['futures_leverage_mode'] = leverage_mode
         config['env']['exchanges'][exchanges.SANDBOX]['futures_leverage'] = leverage
     else:
@@ -58,13 +70,14 @@ def set_up(routes=None, is_futures_trading=True, leverage=1, leverage_mode='cros
     store.reset(True)
 
 
-def single_route_backtest(strategy_name: str, is_futures_trading=True, leverage=1):
+def single_route_backtest(strategy_name: str, is_futures_trading=True, is_inverse_futures=False, leverage=1):
     """
     used to simplify simple tests
     """
     set_up(
         [(exchanges.SANDBOX, 'BTC-USDT', timeframes.MINUTE_1, strategy_name)],
         is_futures_trading=is_futures_trading,
+        is_inverse_futures=is_inverse_futures,
         leverage=leverage
     )
     # dates are fake. just to pass required parameters
