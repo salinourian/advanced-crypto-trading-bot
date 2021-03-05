@@ -16,7 +16,10 @@ CACHED_CONFIG = dict()
 
 def app_currency() -> str:
     from jesse.routes import router
-    return quote_asset(router.routes[0].symbol)
+    underlying = quote_asset(router.routes[0].symbol)
+    if underlying.upper() == 'PERP':
+        underlying = base_asset(router.routes[0].symbol)
+    return underlying
 
 
 def app_mode() -> str:

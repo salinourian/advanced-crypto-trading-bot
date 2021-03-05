@@ -13,6 +13,11 @@ def test_app_currency():
     ])
     assert jh.app_currency() == 'USD'
 
+    router.set_routes([
+        (exchanges.BITFINEX, 'ETH-PERP', timeframes.HOUR_3, 'Test19'),
+    ])
+    assert jh.app_currency() == 'ETH'
+
 
 def test_app_mode():
     assert jh.app_mode() == 'backtest'
