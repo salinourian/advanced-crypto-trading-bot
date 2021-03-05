@@ -23,11 +23,11 @@ def get_btc_and_eth_candles():
     return candles
 
 
-def get_btc_candles():
+def get_btc_candles(symbol='BTC-USDT'):
     candles = {}
-    candles[jh.key(exchanges.SANDBOX, 'BTC-USDT')] = {
+    candles[jh.key(exchanges.SANDBOX, symbol)] = {
         'exchange': exchanges.SANDBOX,
-        'symbol': 'BTC-USDT',
+        'symbol': symbol,
         'candles': fake_range_candle_from_range_prices(range(1, 100))
     }
     return candles
@@ -73,10 +73,10 @@ def single_route_backtest(strategy_name: str, is_futures_trading=True, is_invers
     used to simplify simple tests
     """
     set_up(
-        [(exchanges.SANDBOX, 'BTC-USDT', timeframes.MINUTE_1, strategy_name)],
+        [(exchanges.SANDBOX, 'BTC-USDT' if not is_inverse_futures else 'BTC-PERP', timeframes.MINUTE_1, strategy_name)],
         is_futures_trading=is_futures_trading,
         is_inverse_futures=is_inverse_futures,
         leverage=leverage
     )
     # dates are fake. just to pass required parameters
-    backtest_mode.run('2019-04-01', '2019-04-02', get_btc_candles())
+    backtest_mode.run('2019-04-01', '2019-04-02', get_btc_candles('BTC-USDT' if not is_inverse_futures else 'BTC-PERP'))
