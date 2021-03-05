@@ -51,13 +51,11 @@ def set_up(routes=None, is_futures_trading=True, leverage=1, leverage_mode='cros
     if zero_fee:
         config['env']['exchanges']['Sandbox']['fee'] = 0
 
-    if is_futures_trading:
-        # used only in futures trading
+    if is_futures_trading and not is_inverse_futures:
         config['env']['exchanges'][exchanges.SANDBOX]['type'] = 'futures'
         config['env']['exchanges'][exchanges.SANDBOX]['futures_leverage_mode'] = leverage_mode
         config['env']['exchanges'][exchanges.SANDBOX]['futures_leverage'] = leverage
     elif is_inverse_futures:
-        # used only in futures trading
         config['env']['exchanges'][exchanges.SANDBOX]['type'] = 'inverse futures'
         config['env']['exchanges'][exchanges.SANDBOX]['futures_leverage_mode'] = leverage_mode
         config['env']['exchanges'][exchanges.SANDBOX]['futures_leverage'] = leverage
