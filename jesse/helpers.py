@@ -219,13 +219,13 @@ def get_arrow(timestamp: int) -> arrow.arrow.Arrow:
     return timestamp_to_arrow(timestamp)
 
 
-def get_candle_source(candles: np.ndarray, source_type: str = "close") -> np.array:
+def get_candle_source(candles: np.ndarray, source_type: str = "close") -> np.ndarray:
     """
      Returns the candles corresponding the selected type.
 
      :param candles: np.ndarray
      :param source_type: string
-     :return: np.array
+     :return: np.ndarray
      """
 
     if source_type == "close":
@@ -422,7 +422,18 @@ def now_to_timestamp() -> int:
     return arrow.utcnow().int_timestamp * 1000
 
 
-def np_shift(arr: np.array, num: int, fill_value=0) -> np.array:
+def np_ffill(arr: np.ndarray, axis: int = 0) -> np.ndarray:
+    idx_shape = tuple([slice(None)] + [np.newaxis] * (len(arr.shape) - axis - 1))
+    idx = np.where(~np.isnan(arr), np.arange(arr.shape[axis])[idx_shape], 0)
+    np.maximum.accumulate(idx, axis=axis, out=idx)
+    slc = [np.arange(k)[tuple([slice(None) if dim == i else np.newaxis
+                               for dim in range(len(arr.shape))])]
+           for i, k in enumerate(arr.shape)]
+    slc[axis] = idx
+    return arr[tuple(slc)]
+
+
+def np_shift(arr: np.ndarray, num: int, fill_value=0) -> np.ndarray:
     result = np.empty_like(arr)
 
     if num > 0:
@@ -541,6 +552,7 @@ def readable_duration(seconds: int, granularity: int = 2) -> str:
     )
 
     result = []
+    seconds = int(seconds)
 
     for name, count in intervals:
         value = seconds // count
