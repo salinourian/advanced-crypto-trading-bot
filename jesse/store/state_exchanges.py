@@ -29,6 +29,7 @@ class ExchangesState:
                     name, starting_assets, fee,
                     futures_leverage_mode=jh.get_config('env.exchanges.{}.futures_leverage_mode'.format(name)),
                     futures_leverage=jh.get_config('env.exchanges.{}.futures_leverage'.format(name)),
+                    contract_size=jh.get_config('env.exchanges.{}.contract_size'.format(name)),
                 )
             else:
                 raise InvalidConfig('Value for exchange type in your config file in not valid. Supported values are "spot" and "futures"')

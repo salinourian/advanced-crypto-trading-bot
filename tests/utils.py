@@ -33,13 +33,21 @@ def get_btc_candles(symbol='BTC-USDT'):
     return candles
 
 
-def set_up(routes=None, is_futures_trading=True, leverage=1, leverage_mode='cross', zero_fee=False, is_inverse_futures=False):
+def set_up(
+        routes=None,
+        is_futures_trading=True,
+        leverage=1,
+        leverage_mode='cross',
+        zero_fee=False,
+        is_inverse_futures=False,
+        contract_size=1,
+):
     reset_config()
 
     if is_inverse_futures:
         config['env']['exchanges'][exchanges.SANDBOX]['assets'] = [
             {'asset': 'USDT', 'balance': 0},
-            {'asset': 'BTC', 'balance': 1},
+            {'asset': 'BTC', 'balance': 100},
         ]
     else:
         config['env']['exchanges'][exchanges.SANDBOX]['assets'] = [
@@ -59,6 +67,7 @@ def set_up(routes=None, is_futures_trading=True, leverage=1, leverage_mode='cros
         config['env']['exchanges'][exchanges.SANDBOX]['type'] = 'inverse futures'
         config['env']['exchanges'][exchanges.SANDBOX]['futures_leverage_mode'] = leverage_mode
         config['env']['exchanges'][exchanges.SANDBOX]['futures_leverage'] = leverage
+        config['env']['exchanges'][exchanges.SANDBOX]['contract_size'] = contract_size
     else:
         config['env']['exchanges'][exchanges.SANDBOX]['type'] = 'spot'
 
@@ -68,7 +77,7 @@ def set_up(routes=None, is_futures_trading=True, leverage=1, leverage_mode='cros
     store.reset(True)
 
 
-def single_route_backtest(strategy_name: str, is_futures_trading=True, is_inverse_futures=False, leverage=1):
+def single_route_backtest(strategy_name: str, is_futures_trading=True, is_inverse_futures=False, leverage=1, contract_size=1):
     """
     used to simplify simple tests
     """
@@ -76,7 +85,8 @@ def single_route_backtest(strategy_name: str, is_futures_trading=True, is_invers
         [(exchanges.SANDBOX, 'BTC-USDT' if not is_inverse_futures else 'BTC-PERP', timeframes.MINUTE_1, strategy_name)],
         is_futures_trading=is_futures_trading,
         is_inverse_futures=is_inverse_futures,
-        leverage=leverage
+        leverage=leverage,
+        contract_size=contract_size
     )
     # dates are fake. just to pass required parameters
     backtest_mode.run('2019-04-01', '2019-04-02', get_btc_candles('BTC-USDT' if not is_inverse_futures else 'BTC-PERP'))

@@ -106,6 +106,8 @@ config = {
             'futures_leverage_mode': 'cross',
             # 1x, 2x, 10x, 50x, etc. Enter as integers
             'futures_leverage': 1,
+            # Price per contract, also called the contract-multiplier
+            'contract_size': 100,
 
             'assets': [
                 {'asset': 'BTC', 'balance': 1},

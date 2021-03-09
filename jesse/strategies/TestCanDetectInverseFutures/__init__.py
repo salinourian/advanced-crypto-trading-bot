@@ -6,10 +6,13 @@ class TestCanDetectInverseFutures(Strategy):
     def should_long(self) -> bool:
         if self.index == 0:
             # current capital should be 1 BTC
-            assert self.capital == 1
+            assert self.capital == 100
             assert self.position.exchange.type == 'inverse futures'
             assert self.symbol == 'BTC-PERP'
             assert self.leverage == 2
+            assert self.position.exchange.contract_size == 1
+            # TODO:
+            # assert self.contract_size == 1
 
         return False
 

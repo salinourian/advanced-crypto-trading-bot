@@ -28,12 +28,14 @@ class InverseFuturesExchange(Exchange):
             starting_assets: list,
             fee_rate: float,
             futures_leverage_mode: str,
-            futures_leverage: int
+            futures_leverage: int,
+            contract_size: int,
     ):
         super().__init__(name, starting_assets, fee_rate, 'inverse futures')
 
         self.futures_leverage_mode = futures_leverage_mode
         self.futures_leverage = futures_leverage
+        self.contract_size = contract_size
 
         for item in starting_assets:
             self.buy_orders[item['asset']] = DynamicNumpyArray((10, 2))
@@ -63,7 +65,6 @@ class InverseFuturesExchange(Exchange):
         settlement_currency = jh.base_asset(symbol)
         return self.assets[settlement_currency]
 
-    # TODO
     def available_margin(self, symbol=''):
         if symbol == '':
             raise ValueError
@@ -125,8 +126,9 @@ class InverseFuturesExchange(Exchange):
         # make sure we don't spend more than we're allowed considering current allowed leverage
         if order.type != order_types.MARKET or skip_market_order:
             if not order.is_reduce_only:
-                order_size = abs(order.qty * order.price)
-                remaining_margin = self.available_margin()
+                # TODO: add contract_multiplier to the equation
+                order_size = abs(order.qty / order.price)
+                remaining_margin = self.available_margin(order.symbol)
                 if order_size > remaining_margin:
                     raise InsufficientMargin(
                         'You cannot submit an order for ${} when your margin balance is ${}'.format(
