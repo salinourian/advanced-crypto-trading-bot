@@ -10,9 +10,7 @@ class TestCanDetectInverseFutures(Strategy):
             assert self.position.exchange.type == 'inverse futures'
             assert self.symbol == 'BTC-PERP'
             assert self.leverage == 2
-            assert self.position.exchange.contract_size == 1
-            # TODO:
-            # assert self.contract_size == 1
+            assert self.contract_size == 1
 
         return False
 

@@ -1205,3 +1205,14 @@ class Strategy(ABC):
             return self.position.exchange.futures_leverage
         else:
             raise ValueError('exchange type not supported!')
+
+    @property
+    def contract_size(self):
+        if self.position.exchange.type != 'inverse futures':
+            raise exceptions.InvalidStrategy(
+                'Only inverse futures have access to the contract_size property. You are accessing it from a {} exchange'.format(
+                    self.position.exchange.type
+                )
+            )
+
+        return self.position.exchange.contract_size
