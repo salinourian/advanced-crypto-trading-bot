@@ -10,7 +10,7 @@ import jesse.services.logger as logger
 import jesse.services.selectors as selectors
 from jesse import exceptions
 from jesse.enums import sides, trade_types, order_roles
-from jesse.models import CompletedTrade, Order, Route, FuturesExchange, SpotExchange, Position
+from jesse.models import CompletedTrade, Order, Route, FuturesExchange, SpotExchange, InverseFuturesExchange, Position
 from jesse.models.utils import store_completed_trade_into_db, store_order_into_db
 from jesse.services import metrics
 from jesse.services.broker import Broker
@@ -1200,6 +1200,8 @@ class Strategy(ABC):
         if type(self.position.exchange) is SpotExchange:
             return 1
         elif type(self.position.exchange) is FuturesExchange:
+            return self.position.exchange.futures_leverage
+        elif type(self.position.exchange) is InverseFuturesExchange:
             return self.position.exchange.futures_leverage
         else:
             raise ValueError('exchange type not supported!')
