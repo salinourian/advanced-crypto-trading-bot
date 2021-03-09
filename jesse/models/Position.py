@@ -80,7 +80,8 @@ class Position:
     def roi(self) -> float:
         """
         Return on Investment in percentage
-        More at: https://www.binance.com/en/support/faq/5b9ad93cb4854f5990b9fb97c03cfbeb
+
+        For futures: https://www.binance.com/en/support/faq/5b9ad93cb4854f5990b9fb97c03cfbeb
         """
         return self.pnl / self.total_cost * 100
 
@@ -115,9 +116,12 @@ class Position:
         if self.qty == 0:
             return 0
 
-        diff = self.value - abs(self.entry_price * self.qty)
+        if self.exchange.type != 'inverse futures':
+            diff = self.value - abs(self.entry_price * self.qty)
+            return -diff if self.type == 'short' else diff
 
-        return -diff if self.type == 'short' else diff
+        # PNL = side * Qty * contract_multiplier * (1 / entry price - 1 / exit price)
+        return self.qty * self.exchange.contract_size * (1 / self.entry_price - 1 / self.current_price)
 
     @property
     def is_open(self) -> bool:
